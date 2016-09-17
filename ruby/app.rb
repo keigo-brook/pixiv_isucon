@@ -106,23 +106,27 @@ module Isuconp
         # 20件に減らす
         results.to_a.each do |post|
           # postsにコメント総数カラム追加する
-          post[:comment_count] = db.prepare('SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?').execute(
+          post[:comment_count] = db.prepare('SELECT COUNT(id) AS `count` FROM `comments` WHERE `post_id` = ?').execute(
             post[:id]
           ).first[:count]
 
-          query = 'SELECT * FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC'
+          query = <<SQL
+SELECT *
+FROM comments
+JOIN users AS user ON user.id = comments.user_id
+WHERE post_id = ?
+ORDER BY comments.created_at DESC
+SQL
           unless all_comments
             query += ' LIMIT 3'
           end
-          comments = db.prepare(query).execute(
-            post[:id]
-          ).to_a
+          comments = db.prepare(query).execute(post[:id]).to_a
           # コメント探すときにユーザーJOINする
-          comments.each do |comment|
-            comment[:user] = db.prepare('SELECT * FROM `users` WHERE `id` = ?').execute(
-              comment[:user_id]
-            ).first
-          end
+          # comments.each do |comment|
+          #   comment[:user] = db.prepare('SELECT * FROM `users` WHERE `id` = ?').execute(
+          #     comment[:user_id]
+          #   ).first
+          # end
           post[:comments] = comments.reverse
 
           # postsにユーザーJOINする
