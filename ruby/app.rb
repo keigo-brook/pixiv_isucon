@@ -131,7 +131,7 @@ module Isuconp
           ).first
 
           # resultsを20件にする
-          # posts.push(post) if post[:user][:del_flg] == 0
+          posts.push(post)
           # break if posts.length >= POSTS_PER_PAGE
         end
 
