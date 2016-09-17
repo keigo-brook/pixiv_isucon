@@ -1,0 +1,6 @@
+I, [2016-09-17T19:35:16.415820 #20311]  INFO -- : Refreshing Gem list
+I, [2016-09-17T19:35:16.452786 #20311]  INFO -- : listening on addr=127.0.0.1:8080 fd=9
+I, [2016-09-17T19:35:16.452854 #20311]  INFO -- : worker=0 spawning...
+I, [2016-09-17T19:35:16.453518 #20311]  INFO -- : master process ready
+I, [2016-09-17T19:35:16.453914 #20340]  INFO -- : worker=0 spawned pid=20340
+I, [2016-09-17T19:35:16.454022 #20340]  INFO -- : worker=0 ready
