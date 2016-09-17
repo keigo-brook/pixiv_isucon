@@ -11,7 +11,7 @@ module Isuconp
     set :public_folder, File.expand_path('../../public', __FILE__)
 
     Dir.mkdir('/tmp/stackprof') unless File.exist?('/tmp/stackprof')
-    use StackProf::Middleware, enabled: ENV['ISUPROFILE'] == ?1, mode: :cpu, interval: 1000, save_every: 100, path: '/tmp/stackprof'    
+    use StackProf::Middleware, enabled: true, mode: :cpu, interval: 1000, save_every: 100, path: '/tmp/stackprof'    
 
     UPLOAD_LIMIT = 10 * 1024 * 1024 # 10mb
 

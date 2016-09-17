@@ -7,8 +7,8 @@ if [ -f /var/log/mysql/slow-query.log ]; then
     sudo mv /var/log/mysql/slow-query.log /var/log/mysql/slow-query.log.$date_format
 fi
 
-if [ -f /var/log/nginx/isucon.access.log ]; then
-    sudo mv /var/log/nginx/isucon.access.log /var/log/nginx/isucon.access.log.$date_format
+if [ -f /var/log/nginx/isucon-access.log ]; then
+    sudo mv /var/log/nginx/isucon-access.log /var/log/nginx/isucon.access.log.$date_format
 fi
 
 unicorn_log=/home/isucon/private_isu/webapp/ruby
