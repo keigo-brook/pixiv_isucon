@@ -131,7 +131,7 @@ module Isuconp
           ).first
 
           # resultsを20件にする
-          posts.push(post)
+          posts.push(post) if post[:user][:del_flg] == 0
           # break if posts.length >= POSTS_PER_PAGE
         end
 
@@ -256,9 +256,16 @@ SQL
         return 404
       end
 
-      results = db.prepare('SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` WHERE `user_id` = ? ORDER BY `created_at` DESC').execute(
-        user[:id]
-      )
+      # 削除されていないユーザーの先頭20件を取得したい
+      query = <<SQL
+SELECT p.id AS id, user_id, body, mime, p.created_at AS created_at
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE u.del_flg = 0 and u.id = ?
+ORDER BY p.created_at DESC
+LIMIT 20
+SQL
+      results = db.prepare(query).execute(user[:id])
       posts = make_posts(results)
 
       comment_count = db.prepare('SELECT COUNT(*) AS count FROM `comments` WHERE `user_id` = ?').execute(
@@ -285,9 +292,16 @@ SQL
 
     get '/posts' do
       max_created_at = params['max_created_at']
-      results = db.prepare('SELECT `id`, `user_id`, `body`, `mime`, `created_at` FROM `posts` WHERE `created_at` <= ? ORDER BY `created_at` DESC').execute(
-        max_created_at.nil? ? nil : Time.iso8601(max_created_at).localtime
-      )
+      # 削除されていないユーザーの先頭20件を取得したい
+      query = <<SQL
+SELECT p.id AS id, user_id, body, mime, p.created_at AS created_at
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE u.del_flg = 0 AND p.created_at <= ?
+ORDER BY p.created_at DESC
+LIMIT 20
+SQL
+      results = db.prepare(query).execute(max_created_at.nil? ? nil : Time.iso8601(max_created_at).localtime)
       posts = make_posts(results)
 
       erb :posts, layout: false, locals: { posts: posts }
