@@ -103,7 +103,9 @@ module Isuconp
 
       def make_posts(results, all_comments: false)
         posts = []
+        # 20件に減らす
         results.to_a.each do |post|
+          # postsにコメント総数カラム追加する
           post[:comment_count] = db.prepare('SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?').execute(
             post[:id]
           ).first[:count]
@@ -115,6 +117,7 @@ module Isuconp
           comments = db.prepare(query).execute(
             post[:id]
           ).to_a
+          # コメント探すときにユーザーJOINする
           comments.each do |comment|
             comment[:user] = db.prepare('SELECT * FROM `users` WHERE `id` = ?').execute(
               comment[:user_id]
@@ -122,12 +125,14 @@ module Isuconp
           end
           post[:comments] = comments.reverse
 
+          # postsにユーザーJOINする
           post[:user] = db.prepare('SELECT * FROM `users` WHERE `id` = ?').execute(
             post[:user_id]
           ).first
 
-          posts.push(post) if post[:user][:del_flg] == 0
-          break if posts.length >= POSTS_PER_PAGE
+          # resultsを20件にする
+          # posts.push(post) if post[:user][:del_flg] == 0
+          # break if posts.length >= POSTS_PER_PAGE
         end
 
         posts
@@ -227,7 +232,16 @@ module Isuconp
     get '/' do
       me = get_session_user()
 
-      results = db.query('SELECT `id`, `user_id`, `body`, `created_at`, `mime` FROM `posts` ORDER BY `created_at` DESC')
+      # 削除されていないユーザーの先頭20件を取得したい
+      query = <<SQL
+SELECT p.id AS id, user_id, body, mime, p.created_at AS created_at
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE u.del_flg = 0
+ORDER BY p.created_at DESC
+LIMIT 20
+SQL
+      results = db.query(query)
       posts = make_posts(results)
 
       erb :index, layout: :layout, locals: { posts: posts, me: me }
